@@ -13,16 +13,21 @@ Root:
         pos: 0, 0
         size: Window.size
 
-  Diagram:
-    id: diagram
-    DiagramWidget:
+    Diagram:
+      id: diagram
+      DiagramWidget:
 
-  BoxLayout:
-    orientation: 'horizontal'
-    Button:
-      text: "Color"
-      on_press: root.background_color = get_random_color()
+    BoxLayout:
+      orientation: 'horizontal'
+      size: (300,50)
+      Button:
+        text: "Color"
+        on_press: root.background_color = get_random_color()
 
-    ToggleButton:
-      text: "Draw"
-      on_state: diagram.state = "readonly" if self.state=="normal" else "draw"
+      ToggleButton:
+        text: "Draw"
+        on_state: diagram.state = "readonly" if self.state=="normal" else "draw"
+
+      Button:
+        text: "Add"
+        on_press: diagram.create_new()

@@ -72,7 +72,35 @@ class MInstWidget(RelativeLayout):
     
     def __init__(self, *args, **kwargs):
         super(MInstWidget, self).__init__(*args, **kwargs)
+        self.touch = None
         
         self.add_widget(CircleShape(50))
         self.add_widget(RectangleShape())
+        self.size = (100, 50)
+    
+    def _remember_pos(self, touch):
+        touch.ud['old_x'] = touch.x
+        touch.ud['old_y'] = touch.y
 
+    def on_touch_down(self, touch):
+        if self.parent.parent.state == "readonly" and \
+            len(self.parent.touches)==1:
+            if self.collide_point(touch.x, touch.y):
+                # If dragging is detected remember touch
+                # that started it
+                self.touch = touch
+                self._remember_pos(touch)
+                return True
+        
+    def on_touch_move(self, touch):
+        if self.touch == touch:
+            self.pos = (self.pos[0] + (touch.x-touch.ud['old_x']),
+                        self.pos[1] + (touch.y-touch.ud['old_y']))
+            self._remember_pos(touch)
+            return True
+        
+    def on_touch_up(self, touch):
+        if self.touch == touch:
+            self.touch = None
+            return True
+        

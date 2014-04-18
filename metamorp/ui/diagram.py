@@ -25,11 +25,15 @@ class DiagramWidget(FloatLayout):
     
     def __init__(self, *args, **kwargs):
         super(DiagramWidget, self).__init__(*args, **kwargs)
+        self.touches = set()
 
     def on_touch_down(self, touch):
-#         self.add_widget(ItemWidget(pos=touch.pos)) 
+        self.touches.add(touch) 
         if self.parent.state == "draw":
             self.add_widget(MInstWidget(pos=touch.pos)) 
+            return True
         else:
             return super(FloatLayout, self).on_touch_down(touch)
 
+    def on_touch_up(self, touch):
+        self.touches.discard(touch)
