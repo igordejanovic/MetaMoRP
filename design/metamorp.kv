@@ -1,0 +1,28 @@
+#:kivy 1.0
+#:import Window kivy.core.window.Window
+#:import Diagram metamorp.ui.diagram.Diagram
+#:import DiagramWidget metamorp.ui.diagram.DiagramWidget
+#:import get_random_color kivy.utils.get_random_color
+
+Root:	
+  FloatLayout:
+    canvas:
+      Color:
+        rgba: self.parent.background_color
+      Rectangle:
+        pos: 0, 0
+        size: Window.size
+
+  Diagram:
+    id: diagram
+    DiagramWidget:
+
+  BoxLayout:
+    orientation: 'horizontal'
+    Button:
+      text: "Color"
+      on_press: root.background_color = get_random_color()
+
+    ToggleButton:
+      text: "Draw"
+      on_state: diagram.state = "readonly" if self.state=="normal" else "draw"
