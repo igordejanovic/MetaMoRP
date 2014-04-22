@@ -25,9 +25,22 @@ Root:
         on_press: root.background_color = get_random_color()
 
       ToggleButton:
-        text: "Draw"
-        on_state: diagram.state = "readonly" if self.state=="normal" else "draw"
-
+        id: state_button
+        background_normal: "images/hand.png"
+        background_down: "images/lasso.png"
+        size_hint: None, None
+        size: (64,64)
+        on_press: diagram.state="normal" if self.state == "normal" else "lasso"
+        
       Button:
-        text: "Add"
-        on_press: diagram.create_new()
+        text: "Best fit"
+        on_press: root.best_fit()
+      Button:
+        text: "Cut"
+        on_press: root.cut()
+      Button:
+        text: "Copy"
+        on_press: root.copy()
+      Button:
+        text: "Paste"
+        on_press: root.paste()

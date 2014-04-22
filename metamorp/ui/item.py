@@ -3,9 +3,9 @@ Created on Apr 15, 2014
 
 @author: igor
 '''
-from kivy.graphics import Color, Line 
+from kivy.graphics import Color, Line, PushState, PopState
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.properties import ListProperty, NumericProperty
+from kivy.properties import ListProperty, NumericProperty, BooleanProperty
 
 
 class PrimitiveShape(RelativeLayout):
@@ -70,6 +70,8 @@ class MInstWidget(RelativeLayout):
     configuration.
     """
     
+    selected = BooleanProperty(False)
+    
     def __init__(self, *args, **kwargs):
         super(MInstWidget, self).__init__(*args, **kwargs)
         self.touch = None
@@ -77,30 +79,51 @@ class MInstWidget(RelativeLayout):
         self.add_widget(CircleShape(50))
         self.add_widget(RectangleShape())
         self.size = (100, 50)
+       
+        # Instructions for selection rectangle 
+        self.selection_instructions = [ 
+               PushState(),
+               Color(1, 0, 0, 0.5),
+               Line(points=[-10, -10, -10, self.size[1] + 10,\
+                        self.size[0] + 10, self.size[1] + 10, \
+                        self.size[0] + 10, -10, -10, -10], \
+                        closed=True, width=1, dash_size=10, dash_offset=3),
+               PopState()
+        ]
+        
+    @property
+    def diagram(self):
+        return self._diagram
     
-    def _remember_pos(self, touch):
-        touch.ud['old_x'] = touch.x
-        touch.ud['old_y'] = touch.y
-
+    def on_parent(self, *args):
+        self._diagram = self.parent.parent
+        
+    def on_selected(self, widget, value):
+        """
+        On selection change toggle selection rectangle.
+        """
+        if self.selected:
+            for inst in self.selection_instructions:
+                self.canvas.add(inst)
+        else:
+            for inst in self.selection_instructions:
+                self.canvas.remove(inst)
+    
     def on_touch_down(self, touch):
-        if self.parent.parent.state == "readonly" and \
+        if self.diagram.state == "normal" and \
             len(self.parent.touches)==1:
             if self.collide_point(touch.x, touch.y):
-                # If dragging is detected remember touch
-                # that started it
-                self.touch = touch
-                self._remember_pos(touch)
+                # Toggle selection
+                touch.grab(self)
+                touch.ud['hit'] = self
+                touch.ud['old_select_state'] = self.selected
+                self.selected = True
                 return True
         
-    def on_touch_move(self, touch):
-        if self.touch == touch:
-            self.pos = (self.pos[0] + (touch.x-touch.ud['old_x']),
-                        self.pos[1] + (touch.y-touch.ud['old_y']))
-            self._remember_pos(touch)
-            return True
-        
     def on_touch_up(self, touch):
-        if self.touch == touch:
-            self.touch = None
+        if touch.grab_current is self:
+            if not 'moved' in touch.ud:
+                # If not moved toggle selection state
+                self.selected = not touch.ud['old_select_state']
+            touch.ungrab(self)
             return True
-        
