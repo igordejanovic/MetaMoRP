@@ -8,6 +8,7 @@ from kivy.properties import ListProperty, StringProperty
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import Line
 from metamorp.ui.item import MInstWidget
+from metamorp.core.utils import point_inside_polygon
 
 
 class Diagram(ScatterPlane):
@@ -92,8 +93,13 @@ class DiagramWidget(FloatLayout):
                     # If there is no selection create new item
                     self.add_widget(MInstWidget(pos=touch.pos))
                 
-            # Return to normal mode when lasso touch is up
             if 'lasso' in touch.ud:
+                # Select all items contained inside lasso
+                for item in self.children:
+                    # Take center of the item as reference point
+                    if point_inside_polygon(item.center_x, item.center_y, touch.ud['lasso']):
+                        item.selected = True
+                # Return to normal mode when lasso touch is up
                 self.canvas.remove(self.lasso_line)
                 self.parent.parent.parent.ids.state_button.trigger_action()
 
